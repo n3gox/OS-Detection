@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Colours
+declare -r greenColour="\e[0;32m\033[1m"
+declare -r endColour="\033[0m\e[0m"
+declare -r redColour="\e[0;31m\033[1m"
+declare -r blueColour="\e[0;34m\033[1m"
+declare -r yellowColour="\e[0;33m\033[1m"
+declare -r purpleColour="\e[0;35m\033[1m"
+declare -r turquoiseColour="\e[0;36m\033[1m"
+declare -r grayColour="\e[0;37m\033[1m"
+
+
+# Usage Pannel
+
+usagePannel(){
+
+	echo -e "\n${blueColour}[*] Usage: ./detectOS <ip_address>${endColour}\n" 
+	exit 0
+}
+
+# Control +c
+trap ctrl_c INT
+
+function ctrl_c(){
+	echo -e "\n${redColour}[!] Exiting...${endColour}"
+	tput cnorm; exit 1
+}
+
+# User input ip address
+
+argument=$1
+
+# Check if the number of arguments is 0
+if [[ $# -eq 0 ]]; then
+	usagePannel
+fi
+
+# Ping victim machine, sendig stderr to /dev/null
+command=$(ping -c 1 $argument  2>/dev/null | grep ttl | awk '{print $6}' | tr -d "ttl=")
+
+echo -e "\n${greenColour}Detecting OS...${endColour}"
+
+sleep 3
+
+
+# If statement to detect OS
+
+if [[ $command -gt 0 ]] && [[ $command -le 64 ]]; then
+	echo -e "\nOS -> ${turquoiseColour}Linux${endColour}\n"
+elif [[ $command -gt 65 ]] && [[ $command -le 128 ]]; then
+	echo -e "\nOS -> ${turquoiseColour}Windows${endColour}\n"
+elif [[ $command -gt 129 ]] && [[ $command -le 255 ]]; then
+	echo -e "\nOS -> ${turquoiseColour}Solaris${endColour}\n"
+fi
